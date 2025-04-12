@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fall Detection Alert System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font (Inter for modern UI) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --danger: #ef4444;
+      --success: #10b981;
+      --background: #111827;
+      --text-dark: #ffffff;
+      --text-light: #d1d5db;
+      --border: #374151;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--text-dark);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      justify-content: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 3rem;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 3rem;
+    }
+
+    .left-section {
+      flex: 1;
+      text-align: left;
+      max-width: 500px;
+    }
+
+    .impact-statement {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      justify-content: flex-start;
+    }
+
+    button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      background-color: var(--primary);
+      color: var(--text-dark);
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #1e40af;
+    }
+
+    .status {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      border: 2px solid var(--border);
+      background-color: #2d3748;
+      color: var(--text-light);
+      text-align: center;
+      width: 100%;
+      max-width: 500px;
+      transition: all 0.3s ease;
+    }
+
+    .status.normal {
+      border-color: #4b5563;
+      color: var(--text-light);
+    }
+
+    .status.alert {
+      border-color: var(--danger);
+      color: var(--danger);
+      font-weight: 700;
+      font-size: 1.75rem;
+      animation: pulse 1s infinite;
+    }
+
+    .status.safe {
+      border-color: var(--success);
+      color: var(--success);
+      font-weight: 700;
+      font-size: 1.75rem;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .image-container {
+      flex: 1;
+      max-width: 640px;
+      text-align: center;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 1rem;
+      color: var(--text-light);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .left-section {
+        text-align: center;
+      }
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(17, 24, 39, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: #1f2937;
+      color: var(--text-light);
+      max-width: 800px;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .popup-content h2 {
+      color: var(--text-dark);
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .popup-content p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .popup-content button {
+      background-color: var(--primary);
+      color: var(--text-dark);
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    .popup-content button:hover {
+      background-color: #1e40af;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Popup Modal -->
+  <div id="popup" class="popup-overlay">
+    <div class="popup-content">
+      <h2>Enhancing Safety Through AI-Powered Fall Detection</h2>
+      <p>
+        Every year, millions of older adults experience falls — a leading cause of injury and death among seniors. According to the CDC, 1 in 4 Americans aged 65 and older falls each year, often leading to serious injury, loss of independence, and in some cases, fatal consequences. Timely detection is critical to improving outcomes and enabling rapid response.
+      </p>
+      <p>
+        This application leverages LLaMA 3.2 Vision to interpret live video feeds and determine whether a person has fallen. Unlike traditional systems that rely on motion sensors or expensive infrastructure, this solution uses visual intelligence to understand the context of human posture in a scene — distinguishing between someone sitting, lying down, or having actually fallen.
+      </p>
+      <p>
+        What sets this system apart is its ability to run entirely on the edge — on local hardware such as an Nvidia Jetson or similar hardware. This not only ensures low latency and real-time responsiveness but also respects user privacy by keeping all image data local and eliminating the need for cloud processing.
+      </p>
+      <p>
+        This application currently operates on a laptop, performing safety checks approximately every 1.5 minutes. As visual recognition models become more efficient and hardware capabilities continue to advance, the system will be able to run at shorter intervals. These improvements will enable faster response times and increased reliability, ultimately enhancing overall safety and expanding the potential use cases for real-time monitoring solutions.
+      </p>
+      <p>
+        With an intuitive interface and powerful AI at its core, this fall detection system brings a new level of safety, autonomy, and peace of mind for seniors and caregivers — combining state-of-the-art machine learning with practical, deployable technology.
+      </p>
+      <button onclick="closePopup()">Proceed to Dashboard</button>
+    </div>
+  </div>
+
+
+  <h1>🚨 Fall Detection Alert System 🚨</h1>
+
+  <div class="container">
+    <!-- Left Section (Text, Controls, Impact Statement) -->
+    <div class="left-section">
+      <p class="impact-statement">
+        This application harnesses the Llama 3.2 Vision model to interpert live images. It detects a fall, or dangerous condition.</p>
+        <p class="impact-statement">
+        If a fall is detected, users are alerted via the dashboard. Family members can then dispatch emergency services.
+        </p>
+
+      <div class="controls">
+        <button onclick="start()">Start Detection</button>
+        <button onclick="stop()">Stop Detection</button>
+      </div>
+
+      <!-- <div id="result" class="status normal">Waiting for result...</div> -->
+      <div id="environment" class="status safe">Safe Environment</div>
+    </div>
+
+    <!-- Right Section (Image) -->
+    <div class="image-container">
+      <img id="snapshot" src="/static/webcam_snapshot.jpg" alt="Webcam Snapshot">
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 Ethan Palosh, Jasmita Yechuri, Teri Shim, Ashvin Arora
+  </footer>
+
+  <script>
+    let polling;
+
+    function start() {
+      fetch('/start')
+        .then(() => {
+          // const resultDiv = document.getElementById('result');
+          // resultDiv.innerText = "Detection started...";
+          // resultDiv.className = "status normal";
+          polling = setInterval(updateResult, 5000);
+        });
+    }
+
+    function stop() {
+      fetch('/stop')
+        .then(() => {
+          // const resultDiv = document.getElementById('result');
+          // resultDiv.innerText = "Detection stopped.";
+          // resultDiv.className = "status normal";
+          clearInterval(polling);
+        });
+    }
+
+    function updateResult() {
+      fetch('/result')
+        .then(res => res.json())
+        .then(data => {
+          // const resultDiv = document.getElementById('result');
+          const environmentDiv = document.getElementById('environment');
+
+          // Update result text
+          // resultDiv.innerText = data.result;
+
+          if (data.alert) {
+            // resultDiv.className = "status alert";
+            environmentDiv.className = "status alert";
+            environmentDiv.innerText = "Fall Detected";
+          } else {
+            // resultDiv.className = "status normal";
+            environmentDiv.className = "status safe";
+            environmentDiv.innerText = "Safe Environment";
+          }
+
+          document.getElementById('snapshot').src = '/static/webcam_snapshot.jpg?' + new Date().getTime();
+        });
+    }
+
+    window.onload = () => {
+      document.getElementById('popup').style.display = 'flex';
+    };
+
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+
+  </script>
+</body>
+</html>
